@@ -72,11 +72,9 @@ jobs:
           COSIGN_EXPERIMENTAL: "true"
 
       - name: Generate SBOM with Syft
-        uses: anchore/sbom-action@v0.15.11
-        with:
-          image: ${{ steps.repo-name.outputs.image }}@${{ steps.build-and-push.outputs.digest }}
-          format: spdx-json
-          output-file: sbom.spdx.json
+        run: |
+          curl -sSfL https://raw.githubusercontent.com/anchore/syft/main/install.sh | sh -s -- -b /usr/local/bin
+          syft "${{ steps.repo-name.outputs.image }}@${{ steps.build-and-push.outputs.digest }}" -o spdx-json=sbom.spdx.json
 
       - name: Generate Build Provenance Attestation
         uses: actions/attest-build-provenance@v1
