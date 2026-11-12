@@ -1,7 +1,7 @@
 # syntax=docker/dockerfile:1.4
 
 # Stage 1: Build & compilation environment
-FROM python:3.11-slim-bookworm AS builder
+FROM python:3.15-slim-bookworm AS builder
 
 ARG DEBIAN_MIRROR=deb.debian.org
 
@@ -27,7 +27,7 @@ RUN pip wheel --wheel-dir=/wheels -r requirements.txt
 
 
 # Stage 2: Hardened runtime environment
-FROM python:3.11-slim-bookworm AS runtime
+FROM python:3.15-slim-bookworm AS runtime
 
 ARG DEBIAN_MIRROR=deb.debian.org
 
