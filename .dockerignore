@@ -1,0 +1,41 @@
+# Git
+.git
+.gitignore
+.github
+
+# Python cache & virtual environments
+__pycache__
+*.pyc
+*.pyo
+*.pyd
+.Python
+env/
+venv/
+.venv/
+
+# Testing & Linting
+tests/
+.pytest_cache/
+.coverage
+htmlcov/
+.mypy_cache/
+.ruff_cache/
+
+# Large binaries & model storage (mounted via volume, never baked in)
+models/
+*.gguf
+*.bin
+*.pt
+
+# Infrastructure & Docs
+terraform/
+k8s/
+ansible/
+docs/
+loadtest/
+
+# Local configuration
+.env
+*.md
+!README.md
+Makefile
