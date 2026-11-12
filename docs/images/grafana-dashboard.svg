@@ -1,0 +1,95 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 680" width="100%" height="100%" style="background:#111217;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif">
+  <!-- Grafana Top Navigation Bar -->
+  <rect x="0" y="0" width="1200" height="50" fill="#181b1f" border-bottom="1px solid #22252b"/>
+  <circle cx="25" cy="25" r="12" fill="#F47A20"/>
+  <text x="50" y="31" fill="#d8d9da" font-size="16" font-weight="600">CPU LLM Operations Overview</text>
+  <rect x="980" y="12" width="90" height="26" rx="3" fill="#22252b"/>
+  <text x="1000" y="29" fill="#8e8e8e" font-size="12">Last 15m</text>
+  <rect x="1080" y="12" width="100" height="26" rx="3" fill="#22252b"/>
+  <circle cx="1095" cy="25" r="4" fill="#73BF69"/>
+  <text x="1110" y="29" fill="#73BF69" font-size="12">Auto-refresh</text>
+
+  <!-- KPI Row -->
+  <!-- Card 1: Model Status -->
+  <rect x="20" y="65" width="275" height="110" rx="4" fill="#181b1f" stroke="#22252b"/>
+  <text x="35" y="90" fill="#8e8e8e" font-size="12" font-weight="500">Model Status</text>
+  <rect x="35" y="105" width="120" height="40" rx="4" fill="rgba(115, 191, 105, 0.15)"/>
+  <text x="50" y="132" fill="#73BF69" font-size="22" font-weight="700">LOADED</text>
+  <text x="170" y="132" fill="#8e8e8e" font-size="13">Qwen2.5-1.5B</text>
+
+  <!-- Card 2: Current RPS -->
+  <rect x="310" y="65" width="275" height="110" rx="4" fill="#181b1f" stroke="#22252b"/>
+  <text x="325" y="90" fill="#8e8e8e" font-size="12" font-weight="500">Current Request Rate</text>
+  <text x="325" y="135" fill="#5794F2" font-size="34" font-weight="700">4.25 <tspan font-size="16" fill="#8e8e8e" font-weight="400">req/s</tspan></text>
+
+  <!-- Card 3: p95 Latency -->
+  <rect x="600" y="65" width="275" height="110" rx="4" fill="#181b1f" stroke="#22252b"/>
+  <text x="615" y="90" fill="#8e8e8e" font-size="12" font-weight="500">p95 Inference Latency</text>
+  <text x="615" y="135" fill="#FADE2A" font-size="34" font-weight="700">1.82 <tspan font-size="16" fill="#8e8e8e" font-weight="400">s</tspan></text>
+
+  <!-- Card 4: Tokens/sec -->
+  <rect x="890" y="65" width="290" height="110" rx="4" fill="#181b1f" stroke="#22252b"/>
+  <text x="905" y="90" fill="#8e8e8e" font-size="12" font-weight="500">Token Generation Speed</text>
+  <text x="905" y="135" fill="#B877D9" font-size="34" font-weight="700">26.8 <tspan font-size="16" fill="#8e8e8e" font-weight="400">tokens/s</tspan></text>
+
+  <!-- Panel 1: Latency Percentiles Time Series -->
+  <rect x="20" y="190" width="565" height="230" rx="4" fill="#181b1f" stroke="#22252b"/>
+  <text x="35" y="215" fill="#d8d9da" font-size="14" font-weight="600">Inference Latency Percentiles (p50 / p90 / p95 / p99)</text>
+  <!-- Chart Grid lines -->
+  <line x1="50" y1="240" x2="560" y2="240" stroke="#22252b" stroke-dasharray="3,3"/>
+  <line x1="50" y1="280" x2="560" y2="280" stroke="#22252b" stroke-dasharray="3,3"/>
+  <line x1="50" y1="320" x2="560" y2="320" stroke="#22252b" stroke-dasharray="3,3"/>
+  <line x1="50" y1="360" x2="560" y2="360" stroke="#22252b" stroke-dasharray="3,3"/>
+  <!-- p50 curve (green) -->
+  <path d="M 50 350 Q 150 345, 250 348 T 400 342 T 560 345" fill="none" stroke="#73BF69" stroke-width="2"/>
+  <!-- p95 curve (yellow) -->
+  <path d="M 50 320 Q 150 310, 250 315 T 400 300 T 560 305" fill="none" stroke="#FADE2A" stroke-width="2"/>
+  <!-- p99 curve (red) -->
+  <path d="M 50 280 Q 150 260, 250 270 T 400 250 T 560 255" fill="none" stroke="#F2495C" stroke-width="2"/>
+  <!-- Legend -->
+  <circle cx="55" cy="400" r="4" fill="#73BF69"/><text x="65" y="403" fill="#8e8e8e" font-size="11">p50 (0.8s)</text>
+  <circle cx="160" cy="400" r="4" fill="#FADE2A"/><text x="170" y="403" fill="#8e8e8e" font-size="11">p95 (1.8s)</text>
+  <circle cx="265" cy="400" r="4" fill="#F2495C"/><text x="275" y="403" fill="#8e8e8e" font-size="11">p99 (2.6s)</text>
+
+  <!-- Panel 2: Concurrency & Backpressure Queue -->
+  <rect x="600" y="190" width="580" height="230" rx="4" fill="#181b1f" stroke="#22252b"/>
+  <text x="615" y="215" fill="#d8d9da" font-size="14" font-weight="600">In-Flight Concurrency & Queue Backpressure</text>
+  <!-- Chart Grid lines -->
+  <line x1="630" y1="240" x2="1150" y2="240" stroke="#22252b" stroke-dasharray="3,3"/>
+  <line x1="630" y1="280" x2="1150" y2="280" stroke="#22252b" stroke-dasharray="3,3"/>
+  <line x1="630" y1="320" x2="1150" y2="320" stroke="#22252b" stroke-dasharray="3,3"/>
+  <line x1="630" y1="360" x2="1150" y2="360" stroke="#22252b" stroke-dasharray="3,3"/>
+  <!-- In-flight area -->
+  <path d="M 630 360 L 630 310 L 750 310 L 850 310 L 950 310 L 1150 310 L 1150 360 Z" fill="rgba(87, 148, 242, 0.2)" stroke="#5794F2" stroke-width="2"/>
+  <!-- Queue Depth line -->
+  <path d="M 630 360 L 780 360 L 850 340 L 920 340 L 980 360 L 1150 360" fill="none" stroke="#FF9830" stroke-width="2"/>
+  <!-- Saturation threshold limit line -->
+  <line x1="630" y1="260" x2="1150" y2="260" stroke="#F2495C" stroke-width="1.5" stroke-dasharray="5,3"/>
+  <text x="1040" y="255" fill="#F2495C" font-size="10">Capacity Limit (429)</text>
+  <circle cx="635" cy="400" r="4" fill="#5794F2"/><text x="645" y="403" fill="#8e8e8e" font-size="11">In-Flight (max: 2)</text>
+  <circle cx="770" cy="400" r="4" fill="#FF9830"/><text x="780" y="403" fill="#8e8e8e" font-size="11">Queue Depth (max: 4)</text>
+
+  <!-- Panel 3: HTTP Traffic & Status Distribution -->
+  <rect x="20" y="435" width="565" height="225" rx="4" fill="#181b1f" stroke="#22252b"/>
+  <text x="35" y="460" fill="#d8d9da" font-size="14" font-weight="600">HTTP Request Volume by Status Code</text>
+  <rect x="100" y="490" width="30" height="130" fill="#73BF69" rx="2"/>
+  <rect x="160" y="480" width="30" height="140" fill="#73BF69" rx="2"/>
+  <rect x="220" y="500" width="30" height="120" fill="#73BF69" rx="2"/>
+  <rect x="280" y="470" width="30" height="150" fill="#73BF69" rx="2"/>
+  <rect x="340" y="460" width="30" height="160" fill="#73BF69" rx="2"/>
+  <rect x="340" y="445" width="30" height="15" fill="#FF9830" rx="2"/>
+  <rect x="400" y="480" width="30" height="140" fill="#73BF69" rx="2"/>
+  <rect x="460" y="510" width="30" height="110" fill="#73BF69" rx="2"/>
+  <circle cx="55" cy="640" r="4" fill="#73BF69"/><text x="65" y="643" fill="#8e8e8e" font-size="11">Status 200 (OK - 98.4%)</text>
+  <circle cx="240" cy="640" r="4" fill="#FF9830"/><text x="250" y="643" fill="#8e8e8e" font-size="11">Status 429 (Saturated Backpressure - 1.6%)</text>
+
+  <!-- Panel 4: Host CPU & Memory Utilization -->
+  <rect x="600" y="435" width="580" height="225" rx="4" fill="#181b1f" stroke="#22252b"/>
+  <text x="615" y="460" fill="#d8d9da" font-size="14" font-weight="600">Compute Utilization (CPU Threads & Memory)</text>
+  <!-- CPU line -->
+  <path d="M 630 580 Q 750 510, 850 500 T 980 505 T 1150 520" fill="none" stroke="#5794F2" stroke-width="2"/>
+  <!-- Memory line -->
+  <path d="M 630 560 L 750 560 L 850 560 L 980 560 L 1150 560" fill="none" stroke="#B877D9" stroke-width="2"/>
+  <circle cx="635" cy="640" r="4" fill="#5794F2"/><text x="645" y="643" fill="#8e8e8e" font-size="11">CPU Usage (68.4% of 4 cores)</text>
+  <circle cx="830" cy="640" r="4" fill="#B877D9"/><text x="840" y="643" fill="#8e8e8e" font-size="11">RAM RSS (1.48 GiB / 4.0 GiB limit)</text>
+</svg>
