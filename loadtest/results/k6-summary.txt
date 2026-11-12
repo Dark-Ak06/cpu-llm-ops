@@ -1,0 +1,55 @@
+         /\      Grafana   /‾‾/  
+    /\  /  \     |\  __   /  /   
+   /  \/    \    | |/ /  /   ‾‾\ 
+  /          \   |   (  |  (‾)  |
+ / __________ \  |_|\_\  \_____/ 
+
+     execution: local
+        script: /loadtest/k6-script.js
+        output: -
+
+     scenarios: (100.00%) 1 scenario, 8 max VUs, 1m40s max duration (incl. graceful stop):
+              * default: Up to 8 looping VUs for 1m10s over 4 stages (gracefulRampDown: 30s, gracefulStop: 30s)
+
+  █ THRESHOLDS 
+
+    error_rate
+    ✓ 'rate<0.01' rate=0.00%
+
+    http_req_duration{status:200}
+    ✓ 'p(95)<30000' p(95)=53.9ms
+
+  █ TOTAL RESULTS 
+
+    checks_total.......: 464     6.570476/s
+    checks_succeeded...: 100.00% 464 out of 464
+    checks_failed......: 0.00%   0 out of 464
+
+    ✓ has generated text
+    ✓ has valid latency_ms
+
+    CUSTOM
+    error_rate.....................: 0.00% 0 out of 232
+    inference_latency_ms...........: avg=50.315948 min=49.47   med=50.33   max=51.09   p(90)=50.698  p(95)=50.78 
+    saturation_429_rate............: 0.00% 0 out of 232
+    tokens_generated_total.........: 2037  28.844957/s
+
+    HTTP
+    http_req_duration..............: avg=52.86ms   min=51.44ms med=52.86ms max=55.44ms p(90)=53.62ms p(95)=53.9ms
+      { expected_response:true }...: avg=52.86ms   min=51.44ms med=52.86ms max=55.44ms p(90)=53.62ms p(95)=53.9ms
+      { status:200 }...............: avg=52.86ms   min=51.44ms med=52.86ms max=55.44ms p(90)=53.62ms p(95)=53.9ms
+    http_req_failed................: 0.00% 0 out of 232
+    http_reqs......................: 232   3.285238/s
+
+    EXECUTION
+    iteration_duration.............: avg=1.05s     min=1.05s   med=1.05s   max=1.06s   p(90)=1.05s   p(95)=1.05s 
+    iterations.....................: 232   3.285238/s
+    vus............................: 1     min=1        max=8
+    vus_max........................: 8     min=8        max=8
+
+    NETWORK
+    data_received..................: 72 kB 1.0 kB/s
+    data_sent......................: 64 kB 900 B/s
+
+running (1m10.6s), 0/8 VUs, 232 complete and 0 interrupted iterations
+default ✓ [ 100% ] 0/8 VUs  1m10s
