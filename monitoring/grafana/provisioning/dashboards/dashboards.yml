@@ -1,0 +1,11 @@
+apiVersion: 1
+
+providers:
+  - name: "cpu-llm-ops"
+    orgId: 1
+    folder: "LLM Operations"
+    type: file
+    disableDeletion: true
+    editable: true
+    options:
+      path: /var/lib/grafana/dashboards

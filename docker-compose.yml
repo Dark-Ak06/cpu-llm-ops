@@ -1,0 +1,139 @@
+version: "3.8"
+
+networks:
+  llm-net:
+    driver: bridge
+
+volumes:
+  model-cache:
+    name: cpu-llm-ops-models
+  prometheus-data:
+  grafana-data:
+
+services:
+  # Init step: Download and verify model weights
+  model-downloader:
+    image: alpine/curl:8.7.1
+    container_name: cpu-llm-model-downloader
+    entrypoint: ["/bin/sh", "-c"]
+    command:
+      - |
+        apk add --no-cache bash openssl
+        bash /scripts/download_model.sh
+    environment:
+      MODEL_DIR: /models
+      MODEL_FILE: qwen2.5-1.5b-instruct-q4_k_m.gguf
+      MODEL_SHA256: 6a1a2eb6d15622bf3c96857206351ba97e1af16c30d7a74ee38970e434e9407e
+      MODEL_URL: https://huggingface.co/Qwen/Qwen2.5-1.5B-Instruct-GGUF/resolve/main/qwen2.5-1.5b-instruct-q4_k_m.gguf
+      MOCK_INFERENCE: ${MOCK_INFERENCE:-false}
+    volumes:
+      - model-cache:/models
+      - ./scripts:/scripts:ro
+    networks:
+      - llm-net
+
+  # Core LLM inference service
+  app:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile
+    image: cpu-llm-ops:latest
+    container_name: cpu-llm-inference
+    restart: unless-stopped
+    ports:
+      - "8000:8000"
+    environment:
+      HOST: 0.0.0.0
+      PORT: 8000
+      MODEL_PATH: /models/qwen2.5-1.5b-instruct-q4_k_m.gguf
+      MODEL_NAME: Qwen2.5-1.5B-Instruct
+      N_THREADS: 4
+      N_CTX: 2048
+      N_BATCH: 512
+      MAX_CONCURRENT_REQUESTS: 2
+      MAX_QUEUE_DEPTH: 4
+      REQUEST_TIMEOUT_SECONDS: 60.0
+      LOG_LEVEL: INFO
+      MOCK_INFERENCE: ${MOCK_INFERENCE:-false}
+    volumes:
+      - model-cache:/models:ro
+    depends_on:
+      model-downloader:
+        condition: service_completed_successfully
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 20s
+    networks:
+      - llm-net
+
+  # Prometheus metrics scraper & alert evaluator
+  prometheus:
+    image: prom/prometheus:v2.51.0
+    container_name: cpu-llm-prometheus
+    restart: unless-stopped
+    ports:
+      - "9090:9090"
+    command:
+      - "--config.file=/etc/prometheus/prometheus.yml"
+      - "--storage.tsdb.path=/prometheus"
+      - "--web.console.libraries=/usr/share/prometheus/console_libraries"
+      - "--web.console.templates=/usr/share/prometheus/consoles"
+      - "--web.enable-lifecycle"
+    volumes:
+      - ./monitoring/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - ./monitoring/alerts.yml:/etc/prometheus/alerts.yml:ro
+      - prometheus-data:/prometheus
+    depends_on:
+      app:
+        condition: service_healthy
+    networks:
+      - llm-net
+
+  # Alertmanager
+  alertmanager:
+    image: prom/alertmanager:v0.27.0
+    container_name: cpu-llm-alertmanager
+    restart: unless-stopped
+    ports:
+      - "9093:9093"
+    command:
+      - "--config.file=/etc/alertmanager/alertmanager.yml"
+      - "--storage.path=/alertmanager"
+    volumes:
+      - ./monitoring/alertmanager.yml:/etc/alertmanager/alertmanager.yml:ro
+    networks:
+      - llm-net
+
+  # Grafana dashboard & visualization
+  grafana:
+    image: grafana/grafana:10.4.1
+    container_name: cpu-llm-grafana
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      GF_SECURITY_ADMIN_USER: admin
+      GF_SECURITY_ADMIN_PASSWORD: admin
+      GF_USERS_ALLOW_SIGN_UP: "false"
+      GF_DASHBOARDS_DEFAULT_HOME_DASHBOARD_PATH: /var/lib/grafana/dashboards/llm-ops-overview.json
+    volumes:
+      - ./monitoring/grafana/provisioning:/etc/grafana/provisioning:ro
+      - ./monitoring/grafana/dashboards:/var/lib/grafana/dashboards:ro
+      - grafana-data:/var/lib/grafana
+    depends_on:
+      - prometheus
+    networks:
+      - llm-net
+
+  # Node exporter
+  node-exporter:
+    image: prom/node-exporter:v1.7.0
+    container_name: cpu-llm-node-exporter
+    restart: unless-stopped
+    ports:
+      - "9100:9100"
+    networks:
+      - llm-net

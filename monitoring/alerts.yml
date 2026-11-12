@@ -1,0 +1,50 @@
+groups:
+  - name: cpu-llm-ops-alerts
+    rules:
+      - alert: ServiceDown
+        expr: up{job="cpu-llm-ops"} == 0
+        for: 30s
+        labels:
+          severity: critical
+        annotations:
+          summary: "LLM Inference Service Down"
+          description: "Instance {{ $labels.instance }} of cpu-llm-ops is unreachable."
+
+      - alert: ModelNotLoaded
+        expr: llm_model_loaded == 0
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: "LLM Model Not Loaded"
+          description: "Model weights are not loaded in memory on {{ $labels.instance }}."
+
+      - alert: HighErrorRate
+        expr: >-
+          sum(rate(llm_requests_total{status=~"5..|429"}[2m]))
+          /
+          (sum(rate(llm_requests_total[2m])) > 0) * 100 > 5
+        for: 1m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High LLM Error Rate (> 5%)"
+          description: "Error rate is currently {{ $value | printf \"%.2f\" }}%."
+
+      - alert: HighP95Latency
+        expr: histogram_quantile(0.95, sum(rate(llm_request_duration_seconds_bucket[2m])) by (le)) > 10
+        for: 1m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High p95 Inference Latency (> 10s)"
+          description: "p95 latency is {{ $value | printf \"%.2f\" }} seconds."
+
+      - alert: SaturationHigh
+        expr: (llm_in_flight_requests + llm_queue_depth) >= 4
+        for: 30s
+        labels:
+          severity: warning
+        annotations:
+          summary: "Inference Engine Near Full Saturation"
+          description: "Total pending and active inference count has reached {{ $value }}."
