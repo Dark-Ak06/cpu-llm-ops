@@ -72,7 +72,7 @@ jobs:
           COSIGN_EXPERIMENTAL: "true"
 
       - name: Generate SBOM with Syft
-        uses: anchore/sbom-action@v0.15.11
+        uses: anchore/sbom-action@v0.24.3
         with:
           image: ${{ steps.repo-name.outputs.image }}@${{ steps.build-and-push.outputs.digest }}
           format: spdx-json
