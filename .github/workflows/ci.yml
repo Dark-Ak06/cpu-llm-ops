@@ -193,6 +193,8 @@ jobs:
 
       - name: Run Trivy Vulnerability Scanner (Image)
         uses: aquasecurity/trivy-action@v0.36.0
+        env:
+          TRIVY_IGNOREFILE: .trivyignore
         with:
           image-ref: cpu-llm-ops:test-scan
           format: "table"
@@ -204,6 +206,8 @@ jobs:
 
       - name: Run Trivy Config Scanner (IaC)
         uses: aquasecurity/trivy-action@v0.36.0
+        env:
+          TRIVY_IGNOREFILE: .trivyignore
         with:
           scan-type: "config"
           scan-ref: "."

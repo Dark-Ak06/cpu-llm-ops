@@ -58,7 +58,8 @@ RUN groupadd -g 10001 appgroup && \
 # Install wheels from builder stage
 COPY --from=builder /wheels /wheels
 RUN pip install --no-cache-dir /wheels/*.whl && \
-    rm -rf /wheels
+    pip uninstall -y setuptools wheel 2>/dev/null || true && \
+    rm -rf /wheels /root/.cache
 
 # Copy application source code
 COPY --chown=appuser:appgroup app/ /app/app/

@@ -1,11 +1,13 @@
 # Trivy suppression file for evaluated security findings
 #
-# Starlette multipart/form-data DoS and static file traversal findings
+# Starlette DoS and multipart/form-data findings
 # Evaluated context: cpu-llm-ops only accepts application/json inference payloads.
-# No static file mounts and no multipart form parsing are exposed or reachable.
+# No static file mounts, range header streaming, or multipart form parsing are exposed or reachable.
 CVE-2024-47874
 CVE-2026-48818
 CVE-2026-54283
+CVE-2025-62727
 
-# Build/wheel package manager metadata
+# Python build tool / wheel package manager metadata
 CVE-2026-24049
+CVE-2026-23949
