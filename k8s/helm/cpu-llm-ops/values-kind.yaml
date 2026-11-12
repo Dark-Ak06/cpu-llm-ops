@@ -1,0 +1,38 @@
+# Specialized values for local kind cluster verification
+
+replicaCount: 1
+
+image:
+  repository: cpu-llm-ops
+  pullPolicy: Never
+  tag: latest
+
+resources:
+  requests:
+    cpu: 250m
+    memory: 512Mi
+  limits:
+    cpu: 2000m
+    memory: 2048Mi
+
+runtime:
+  mockInference: true
+  maxConcurrentRequests: 2
+  maxQueueDepth: 4
+  nThreads: 2
+
+model:
+  initContainer:
+    enabled: false
+
+persistence:
+  enabled: false
+
+autoscaling:
+  enabled: false
+
+podDisruptionBudget:
+  enabled: false
+
+networkPolicy:
+  enabled: false

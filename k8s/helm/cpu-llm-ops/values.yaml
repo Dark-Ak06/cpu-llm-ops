@@ -1,0 +1,141 @@
+# Default values for cpu-llm-ops Helm chart
+
+replicaCount: 1
+
+image:
+  repository: cpu-llm-ops
+  pullPolicy: IfNotPresent
+  tag: "latest"
+
+imagePullSecrets: []
+nameOverride: ""
+fullnameOverride: ""
+
+serviceAccount:
+  create: true
+  automount: true
+  annotations: {}
+  name: ""
+
+podAnnotations:
+  prometheus.io/scrape: "true"
+  prometheus.io/port: "8000"
+  prometheus.io/path: "/metrics"
+
+podLabels:
+  app.kubernetes.io/component: inference-engine
+
+podSecurityContext:
+  runAsNonRoot: true
+  runAsUser: 10001
+  runAsGroup: 10001
+  fsGroup: 10001
+  seccompProfile:
+    type: RuntimeDefault
+
+securityContext:
+  allowPrivilegeEscalation: false
+  readOnlyRootFilesystem: true
+  runAsNonRoot: true
+  runAsUser: 10001
+  runAsGroup: 10001
+  capabilities:
+    drop:
+      - ALL
+
+service:
+  type: ClusterIP
+  port: 8000
+  targetPort: 8000
+
+ingress:
+  enabled: false
+  className: ""
+  annotations: {}
+  hosts:
+    - host: cpu-llm-ops.local
+      paths:
+        - path: /
+          pathType: ImplementationSpecific
+  tls: []
+
+resources:
+  requests:
+    cpu: 1000m
+    memory: 1536Mi
+  limits:
+    cpu: 4000m
+    memory: 4096Mi
+
+# Model Configuration & Init Container
+model:
+  name: "Qwen2.5-1.5B-Instruct"
+  file: "qwen2.5-1.5b-instruct-q4_k_m.gguf"
+  path: "/models/qwen2.5-1.5b-instruct-q4_k_m.gguf"
+  sha256: "6a1a2eb6d15622bf3c96857206351ba97e1af16c30d7a74ee38970e434e9407e"
+  url: "https://huggingface.co/Qwen/Qwen2.5-1.5B-Instruct-GGUF/resolve/main/qwen2.5-1.5b-instruct-q4_k_m.gguf"
+  initContainer:
+    enabled: true
+    image: alpine/curl:8.7.1
+
+# Engine Runtime Parameters
+runtime:
+  nThreads: 4
+  nCtx: 2048
+  nBatch: 512
+  maxConcurrentRequests: 2
+  maxQueueDepth: 4
+  requestTimeoutSeconds: 60.0
+  maxTokensLimit: 512
+  mockInference: false
+
+probes:
+  startup:
+    httpGet:
+      path: /health
+      port: 8000
+    initialDelaySeconds: 5
+    periodSeconds: 5
+    failureThreshold: 30
+  liveness:
+    httpGet:
+      path: /health
+      port: 8000
+    initialDelaySeconds: 15
+    periodSeconds: 10
+    timeoutSeconds: 5
+    failureThreshold: 3
+  readiness:
+    httpGet:
+      path: /ready
+      port: 8000
+    initialDelaySeconds: 10
+    periodSeconds: 5
+    timeoutSeconds: 3
+    failureThreshold: 3
+
+autoscaling:
+  enabled: true
+  minReplicas: 1
+  maxReplicas: 3
+  targetCPUUtilizationPercentage: 80
+
+podDisruptionBudget:
+  enabled: true
+  minAvailable: 1
+
+persistence:
+  enabled: true
+  storageClass: ""
+  accessMode: ReadWriteOnce
+  size: 5Gi
+
+networkPolicy:
+  enabled: true
+
+metrics:
+  serviceMonitor:
+    enabled: false
+    interval: 10s
+    scrapeTimeout: 10s
+    labels: {}

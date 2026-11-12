@@ -1,0 +1,17 @@
+apiVersion: v2
+name: cpu-llm-ops
+description: Production-grade Helm chart for CPU-only LLM inference microservice
+type: application
+version: 0.1.0
+appVersion: "0.1.0"
+keywords:
+  - llm
+  - ai
+  - mlops
+  - inference
+  - cpu
+  - qwen
+maintainers:
+  - name: Darkhan Akanov
+    email: Dark-Ak06@users.noreply.github.com
+    url: https://github.com/Dark-Ak06

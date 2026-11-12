@@ -1,0 +1,108 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "cpu-llm-ops.fullname" . }}
+  labels:
+    {{- include "cpu-llm-ops.labels" . | nindent 4 }}
+spec:
+  {{- if not .Values.autoscaling.enabled }}
+  replicas: {{ .Values.replicaCount }}
+  {{- end }}
+  selector:
+    matchLabels:
+      {{- include "cpu-llm-ops.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      annotations:
+        checksum/config: {{ include (print $.Template.BasePath "/configmap.yaml") . | sha256sum }}
+        {{- with .Values.podAnnotations }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+      labels:
+        {{- include "cpu-llm-ops.labels" . | nindent 8 }}
+        {{- with .Values.podLabels }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+    spec:
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      securityContext:
+        {{- toYaml .Values.podSecurityContext | nindent 8 }}
+      {{- if and .Values.model.initContainer.enabled (not .Values.runtime.mockInference) }}
+      initContainers:
+        - name: model-downloader
+          image: {{ .Values.model.initContainer.image | quote }}
+          command:
+            - /bin/sh
+            - -c
+            - |
+              set -eu
+              echo "Checking model artifact at /models/{{ .Values.model.file }}"
+              if [ -f "/models/{{ .Values.model.file }}" ]; then
+                echo "Model weights already cached on volume."
+                exit 0
+              fi
+              echo "Downloading model weights from Hugging Face..."
+              curl -fL --retry 3 -o "/models/{{ .Values.model.file }}.tmp" "{{ .Values.model.url }}"
+              mv "/models/{{ .Values.model.file }}.tmp" "/models/{{ .Values.model.file }}"
+              chmod 644 "/models/{{ .Values.model.file }}"
+              echo "Download complete."
+          securityContext:
+            allowPrivilegeEscalation: false
+            runAsUser: 10001
+            runAsGroup: 10001
+            runAsNonRoot: true
+            capabilities:
+              drop:
+                - ALL
+          volumeMounts:
+            - name: model-volume
+              mountPath: /models
+            - name: tmp-volume
+              mountPath: /tmp
+      {{- end }}
+      containers:
+        - name: {{ .Chart.Name }}
+          securityContext:
+            {{- toYaml .Values.securityContext | nindent 12 }}
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          envFrom:
+            - configMapRef:
+                name: {{ include "cpu-llm-ops.fullname" . }}-config
+          ports:
+            - name: http
+              containerPort: {{ .Values.service.port }}
+              protocol: TCP
+          {{- with .Values.probes.startup }}
+          startupProbe:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          {{- with .Values.probes.liveness }}
+          livenessProbe:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          {{- with .Values.probes.readiness }}
+          readinessProbe:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
+          volumeMounts:
+            - name: model-volume
+              mountPath: /models
+              readOnly: true
+            - name: tmp-volume
+              mountPath: /tmp
+      volumes:
+        - name: model-volume
+          {{- if .Values.persistence.enabled }}
+          persistentVolumeClaim:
+            claimName: {{ include "cpu-llm-ops.fullname" . }}-model-pvc
+          {{- else }}
+          emptyDir: {}
+          {{- end }}
+        - name: tmp-volume
+          emptyDir: {}
