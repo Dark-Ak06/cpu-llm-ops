@@ -3,11 +3,11 @@
 # Stage 1: Build & compilation environment
 FROM python:3.11-slim-bookworm AS builder
 
-ARG DEBIAN_MIRROR=mirror.yandex.ru
+ARG DEBIAN_MIRROR=deb.debian.org
 
 WORKDIR /build
 
-# Configure robust mirror and install minimal toolchain for C++ compilation
+# Configure mirror and install minimal toolchain for C++ compilation
 # hadolint ignore=DL3008
 RUN sed -i "s|deb.debian.org|${DEBIAN_MIRROR}|g" /etc/apt/sources.list.d/debian.sources 2>/dev/null || true && \
     apt-get update && apt-get install -y --no-install-recommends \
@@ -29,7 +29,7 @@ RUN pip wheel --wheel-dir=/wheels -r requirements.txt
 # Stage 2: Hardened runtime environment
 FROM python:3.11-slim-bookworm AS runtime
 
-ARG DEBIAN_MIRROR=mirror.yandex.ru
+ARG DEBIAN_MIRROR=deb.debian.org
 
 LABEL org.opencontainers.image.title="cpu-llm-ops" \
       org.opencontainers.image.description="Production CPU-Only LLM Inference Service" \
@@ -68,6 +68,6 @@ USER 10001:10001
 EXPOSE 8000
 
 HEALTHCHECK --interval=15s --timeout=5s --start-period=30s --retries=3 \
-    CMD curl -f http://localhost:8000/health || exit 1
+    CMD ["curl", "-f", "http://localhost:8000/health"]
 
 ENTRYPOINT ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000", "--workers", "1"]
