@@ -1,0 +1,5 @@
+aws_region    = "us-east-1"
+environment   = "production"
+instance_type = "c6i.xlarge"
+vpc_id        = "vpc-0123456789abcdef0"
+subnet_id     = "subnet-0123456789abcdef0"
