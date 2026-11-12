@@ -30,6 +30,15 @@ echo "Target path:      ${TARGET_PATH}"
 echo "Expected SHA256:  ${EXPECTED_SHA256}"
 echo "Source URL:       ${MODEL_URL}"
 
+if [[ "${MOCK_INFERENCE:-false}" == "true" || "${MOCK_MODE:-false}" == "true" ]]; then
+    echo "[INFO] MOCK_INFERENCE is active. Initializing fast mock model artifact."
+    mkdir -p "$(dirname "${TARGET_PATH}")"
+    echo "mock-qwen-model-payload" > "${TARGET_PATH}"
+    chmod 644 "${TARGET_PATH}"
+    echo "[OK] Mock model artifact ready at ${TARGET_PATH}"
+    exit 0
+fi
+
 if [[ -f "${TARGET_PATH}" ]]; then
     echo "Found existing file at ${TARGET_PATH}. Computing checksum..."
     CURRENT_SHA256=$(calc_sha256 "${TARGET_PATH}")
