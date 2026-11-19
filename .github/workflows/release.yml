@@ -77,7 +77,7 @@ jobs:
           syft "${{ steps.repo-name.outputs.image }}@${{ steps.build-and-push.outputs.digest }}" -o spdx-json=sbom.spdx.json
 
       - name: Generate Build Provenance Attestation
-        uses: actions/attest-build-provenance@v1
+        uses: actions/attest-build-provenance@v4
         with:
           subject-name: ${{ steps.repo-name.outputs.image }}
           subject-digest: ${{ steps.build-and-push.outputs.digest }}
